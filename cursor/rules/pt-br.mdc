@@ -1,0 +1,11 @@
+---
+description: Chat em português brasileiro (pt-BR); código e docs no idioma do repositório.
+alwaysApply: true
+---
+
+# Idioma
+
+When I write in Portuguese, reply in Brazilian Portuguese (pt-BR), never European Portuguese (pt-PT).
+When I write in English, reply in English.
+Keep code, identifiers, comments, and technical docs in the repo's language (usually English).
+Commit/PR/issue text follows the destination, not the chat language.

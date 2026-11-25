@@ -1,0 +1,49 @@
+---
+description: The parent chat runs Grok and dispatches; subagent roles pin their models; at most one third-party call per task.
+globs:
+alwaysApply: true
+---
+
+# Parent chat
+
+The parent chat runs Grok 4.7, effort high, Fast on (`grok-4.7`, `reasoning_effort=high`, `fast=true`). Keep the parent on this model. Auto is out. This file is text: the parent pins a model only by launching a subagent.
+
+The parent is the dispatcher: it plans, decides, delegates and reviews what comes back. Run a tool inline only when its result decides the next step and it takes one or two calls (one file read, one status check). Everything else goes to a subagent.
+
+# Roles
+
+Each role is a `Task` subagent (`subagent_type: generalPurpose`) with the model slug set on the call. Put the role name in the subagent's description and prompt.
+
+| Role | Use for | Model |
+|---|---|---|
+| `executor` | Specified mechanical edit: exact wording, find-and-replace, a known CLI check, a routine commit. Pick it without asking. | Composer 2.5 (Cursor pool) |
+| `researcher` | Read-only investigation where only the conclusion matters. The prompt says to change nothing. | `grok-4.7`, effort high, Fast on |
+| `reviewer` | Read-only first-pass review of a diff against its task. The prompt says to change nothing. | `grok-4.7`, effort high, Fast on |
+| `implementer` | Execution that needs judgment at every step, in its own window. | `grok-4.7`, effort high, Fast on |
+| `advisor` | Read-only second opinion when the approach is not chosen yet and undo is expensive, including an irreversible change. | `claude-opus-5-5-medium` (third-party call) |
+
+Give every subagent the full context in its prompt (it has no access to the chat) and ask for a concise conclusion. Review the result before acting. At the end of a phase, compact or start a fresh chat.
+
+# Third-party calls
+
+`other_models: open`
+
+When `other_models` is `open`, at most one third-party call per task. Pick before spending:
+- Approach not chosen yet and undo is expensive: the `advisor`, `claude-opus-5-5-medium`. Give it the problem, constraints and files, not your conclusion. Ask for trade-offs and a recommendation, then present the plan yourself.
+- User asks for the ceiling, or the question is a closed-book fact and the material is not in the prompt: one subagent, `gemini-4-carbon-medium`.
+- One task gets Opus or Carbon, not both.
+- Everything else stays on Grok or Composer.
+
+When `other_models` is `closed`, the advisor and Carbon cases stay on the parent Grok. Make no third-party call.
+
+If the user asks for high before that call, do not launch the medium subagent. Reply with the model the task would have used (`claude-opus-5-5` or `gemini-4-carbon`), Effort high (Tab to the Effort field), the absolute workspace path, and a self-contained prompt. The user starts that agent. If the medium subagent already ran, the task is finished. Do not offer a second call.
+
+If the medium launch is rejected, stop and say so. Do not substitute another model. Do not change the parent model.
+
+Do not use Fable, Sonnet, or Hydrogen. Leave the CLI Explore model at `default`.
+
+Bruno sets `other_models` to `closed` when Spending hits zero or a third-party request is rejected for the limit. On 5 December 2026 Bruno sets it back to `open` by hand; nothing changes it automatically. Change a model id only after Bruno finishes a comparison.
+
+# Commits
+
+Use [Conventional Commits](https://www.conventionalcommits.org/): `type(scope): succinct English summary`, no period at the end.
