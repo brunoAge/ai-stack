@@ -9,8 +9,9 @@ if command -v shellcheck >/dev/null; then shellcheck "$REPO/install.sh" "$REPO/c
 jq -e . "$REPO/cursor/hooks.json" >/dev/null
 
 CURSOR_HOME="$(mktemp -d)"
-trap 'rm -rf "$CURSOR_HOME"' EXIT
-export CURSOR_HOME
+AGENTS_HOME="$(mktemp -d)"
+trap 'rm -rf "$CURSOR_HOME" "$AGENTS_HOME"' EXIT
+export CURSOR_HOME AGENTS_HOME
 # shellcheck source=install.sh
 source "$REPO/install.sh"
 
@@ -18,7 +19,7 @@ source "$REPO/install.sh"
 copy_stack_files >/dev/null
 configure_rtk_hook >/dev/null
 cmp -s "$REPO/cursor/rules/workflow-preferences.mdc" "$CURSOR_HOME/rules/workflow-preferences.mdc"
-cmp -s "$REPO/cursor/skills/update-stack/SKILL.md" "$CURSOR_HOME/skills/update-stack/SKILL.md"
+cmp -s "$REPO/cursor/skills/update-stack/SKILL.md" "$AGENTS_HOME/skills/update-stack/SKILL.md"
 cmp -s "$REPO/cursor/hooks.json" "$CURSOR_HOME/hooks.json"
 
 # A changed file and a foreign hooks.json are kept when the answer is no (stdin is not a terminal).

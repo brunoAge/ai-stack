@@ -30,15 +30,15 @@ Give every subagent the full context in its prompt (it has no access to the chat
 
 When `other_models` is `open`, at most one third-party call per task. Pick before spending:
 - Approach not chosen yet and undo is expensive: the `advisor`, `claude-opus-5-5-medium`. Give it the problem, constraints and files, not your conclusion. Ask for trade-offs and a recommendation, then present the plan yourself.
-- User asks for the ceiling, or the question is a closed-book fact and the material is not in the prompt: one subagent, `gemini-4-carbon-medium`.
+- User asks for the ceiling, or the question is a closed-book fact and the material is not in the prompt: one subagent, `gemini-4-carbon-medium`. "Ceiling" picks the model (Carbon); "high" picks the effort.
 - One task gets Opus or Carbon, not both.
 - Everything else stays on Grok or Composer.
 
-When `other_models` is `closed`, the advisor and Carbon cases stay on the parent Grok. Make no third-party call.
+When `other_models` is `closed`, the advisor and Carbon cases stay on the parent Grok. Make no third-party call and no hand-off: answer on the parent Grok and say Opus and Carbon are closed until Bruno reopens them.
 
-If the user asks for high before that call, do not launch the medium subagent. Reply with the model the task would have used (`claude-opus-5-5` or `gemini-4-carbon`), Effort high (Tab to the Effort field), the absolute workspace path, and a self-contained prompt. The user starts that agent. If the medium subagent already ran, the task is finished. Do not offer a second call.
+If the user asks for high before that call, do not launch the medium subagent. Ceiling alone launches one `gemini-4-carbon-medium` subagent; ceiling plus high launches nothing and hands off with `gemini-4-carbon`, Effort high. Reply with the model the task would have used (`claude-opus-5-5` or `gemini-4-carbon`), Effort high (Tab to the Effort field), the absolute workspace path, and a self-contained prompt. The user starts that agent. If the medium subagent already ran, the task is finished. Do not offer a second call.
 
-If the medium launch is rejected, stop and say so. Do not substitute another model. Do not change the parent model.
+If a third-party launch is rejected for the spending limit, stop, say so, and suggest setting `other_models: closed`. Any other rejection: stop and say so. In both cases do not substitute another model and do not change the parent model.
 
 Do not use Fable, Sonnet, or Hydrogen. Leave the CLI Explore model at `default`.
 

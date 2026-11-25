@@ -5,8 +5,9 @@ set -euo pipefail
 
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CURSOR_HOME="${CURSOR_HOME:-$HOME/.cursor}"
+AGENTS_HOME="${AGENTS_HOME:-$HOME/.agents}"
 export PATH="$HOME/.local/bin:$PATH"
-PONYTAIL_URL=https://raw.githubusercontent.com/DietrichGebert/ponytail/main/.cursor/rules/ponytail.mdc
+PONYTAIL_URL=https://raw.githubusercontent.com/DietrichGebert/ponytail/2a1fe842d078cf66ec7f3e6096a8ca4279c2cad7/.cursor/rules/ponytail.mdc
 RTK_HOOK_MERGE='.version //= 1 | .hooks.preToolUse = ((.hooks.preToolUse // []) + [{"command": "rtk hook cursor", "matcher": "Shell"}])'
 
 log() { printf '==> %s\n' "$*"; }
@@ -84,13 +85,13 @@ configure_rtk_hook() {
 }
 
 install_matt_skills() {
-  if [[ -d $HOME/.agents/skills/setup-matt-pocock-skills || -d $CURSOR_HOME/skills/setup-matt-pocock-skills ]]; then
+  if [[ -d $AGENTS_HOME/skills/setup-matt-pocock-skills || -d $CURSOR_HOME/skills/setup-matt-pocock-skills ]]; then
     log "Matt Pocock skills present (update them with /update-stack)"
   elif ! command -v npx >/dev/null; then
-    warn "npx not found: install Node.js, then run: npx skills@latest add mattpocock/skills -g -a cursor"
+    warn "npx not found: install Node.js, then run: npx skills@1.9.0 add mattpocock/skills -g -a cursor"
   else
     log "installing Matt Pocock skills (https://github.com/mattpocock/skills)"
-    npx --yes skills@latest add mattpocock/skills -g -a cursor -y
+    npx --yes skills@1.9.0 add mattpocock/skills -g -a cursor -y
   fi
 }
 
@@ -100,7 +101,7 @@ copy_stack_files() {
     copy_file "$src" "$CURSOR_HOME/rules/$(basename "$src")"
   done
   while IFS= read -r -d '' src; do
-    copy_file "$src" "$CURSOR_HOME/skills/${src#"$REPO/cursor/skills/"}"
+    copy_file "$src" "$AGENTS_HOME/skills/${src#"$REPO/cursor/skills/"}"
   done < <(find "$REPO/cursor/skills" -type f -print0)
 }
 
