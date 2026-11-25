@@ -44,7 +44,7 @@ In an agent chat opened in this repo, run `/update-stack`. It fetches Matt's ski
 
 - The parent chat stays on Grok (`grok-4.7`, effort high, Fast on) and dispatches: it plans, delegates and reviews.
 - Roles are `Task` subagents with the model slug set on the call: `executor` → Composer 2.5 (Cursor pool); `researcher`, `reviewer`, `implementer` → Grok; `advisor` → `claude-opus-5-5-medium`.
-- `other_models: open|closed` is the budget switch. Open: at most one third-party call per task, either the Opus advisor (approach not chosen, expensive undo) or Gemini Carbon `gemini-4-carbon-medium` (you ask for the ceiling, or a closed-book fact). Closed: no third-party calls; those cases stay on Grok.
+- `other_models: open|closed` is the budget switch. Open: at most one third-party call per task, either the Opus advisor (approach not chosen, expensive undo) or Gemini Carbon: "ceiling" launches a `gemini-4-carbon-medium` subagent, while "ceiling" with "high" hands off a prompt for `gemini-4-carbon`, Effort high, instead of launching. Closed: no third-party launch and no hand-off; the parent answers on Grok, and a launch rejected for the spending limit stops and suggests `closed`.
 - Asking for "high" gets a hand-off prompt for you to start the agent yourself. Fable, Sonnet and Hydrogen are not used.
 
 Roles exist only in the rule: Cursor CLI reads declared agents (`.cursor/agents/`) at project level only, so there is no user-level agent file to install.
