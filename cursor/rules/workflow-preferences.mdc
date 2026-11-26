@@ -8,7 +8,7 @@ alwaysApply: true
 
 The parent chat runs Grok 4.7, effort high, Fast on (`grok-4.7`, `reasoning_effort=high`, `fast=true`). Keep the parent on this model. Auto is out. This file is text: the parent pins a model only by launching a subagent.
 
-The parent is the dispatcher: it plans, decides, delegates and reviews what comes back. Run a tool inline only when its result decides the next step and it takes one or two calls (one file read, one status check). Everything else goes to a subagent.
+The parent is the dispatcher: it plans, decides, delegates and reviews what comes back. Run a tool inline when its output is small: a few file reads, greps or status checks, a short edit with exact wording, a routine commit. A subagent pays a fixed overhead (its own system prompt and tool definitions) before doing any work, so delegate only when the work would put more than that into the parent's context, can run in parallel, or is a long chain of steps: sweeps across many files, long logs or test output, web research, multi-file changes.
 
 # Roles
 
@@ -16,7 +16,7 @@ Each role is a `Task` subagent (`subagent_type: generalPurpose`) with the model 
 
 | Role | Use for | Model |
 |---|---|---|
-| `executor` | Specified mechanical edit: exact wording, find-and-replace, a known CLI check, a routine commit. Pick it without asking. | Composer 2.5 (Cursor pool) |
+| `executor` | Specified mechanical work with bulky output or many steps: find-and-replace across many files, a test run with long logs, a scripted batch. Pick it without asking; a single command or one short edit stays inline. | Composer 2.5 (Cursor pool) |
 | `researcher` | Read-only investigation where only the conclusion matters. The prompt says to change nothing. | `grok-4.7`, effort high, Fast on |
 | `reviewer` | Read-only first-pass review of a diff against its task. The prompt says to change nothing. | `grok-4.7`, effort high, Fast on |
 | `implementer` | Execution that needs judgment at every step, in its own window. | `grok-4.7`, effort high, Fast on |
